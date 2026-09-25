@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Online Banking</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f8;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 700px;
+            margin: auto;
+        }
+
+        .card {
+            background: white;
+            padding: 25px;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        h1, h2 {
+            margin-top: 0;
+        }
+
+        .balance {
+            font-size: 32px;
+            font-weight: bold;
+            margin: 15px 0;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        button {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 5px;
+        }
+
+        .deposit-btn {
+            background: #28a745;
+            color: white;
+        }
+
+        .withdraw-btn {
+            background: #dc3545;
+            color: white;
+        }
+
+        .refresh-btn {
+            background: #007bff;
+            color: white;
+        }
+
+        .logout-btn {
+            background: #333;
+            color: white;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        th, td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+
+        th {
+            background: #f0f0f0;
+        }
+
+        .message {
+            margin-top: 10px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="card">
+        <h1>Welcome, <span id="userName">User</span></h1>
+
+        <p>Account Number: <strong id="accountNumber"></strong></p>
+        <p>Account Type: <strong id="accountType"></strong></p>
+        <p>Status: <strong id="status"></strong></p>
+    </div>
+
+    <div class="card">
+        <h2>Balance</h2>
+
+        <div class="balance" id="balance">₹0.00</div>
+
+        <button class="refresh-btn" onclick="loadAccount()">
+            Refresh Balance
+        </button>
+    </div>
+
+    <div class="card">
+        <h2>Deposit</h2>
+
+        <input
+            type="number"
+            id="depositAmount"
+            placeholder="Enter deposit amount"
+            min="1"
+        >
+
+        <button class="deposit-btn" onclick="deposit()">
+            Deposit
+        </button>
+    </div>
+
+    <div class="card">
+        <h2>Withdraw</h2>
+
+        <input
+            type="number"
+            id="withdrawAmount"
+            placeholder="Enter withdrawal amount"
+            min="1"
+        >
+
+        <button class="withdraw-btn" onclick="withdraw()">
+            Withdraw
+        </button>
+    </div>
+
+    <div class="card">
+        <h2>Account Details</h2>
+
+        <p>Holder: <strong id="holder"></strong></p>
+        <p>Account: <strong id="account"></strong></p>
+        <p>Type: <strong id="detailsType"></strong></p>
+        <p>Status: <strong id="detailsStatus"></strong></p>
+    </div>
+
+    <div class="card">
+        <h2>Transaction History</h2>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Type</th>
+                    <th>Amount</th>
+                    <th>Balance After</th>
+                </tr>
+            </thead>
+
+            <tbody id="transactionTable">
+                <tr>
+                    <td colspan="4">Loading transactions...</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="card">
+        <button class="logout-btn" onclick="logout()">
+            Logout
+        </button>
+    </div>
+
+</div>
+
+<script>
+
+    const accountNumber =
+        localStorage.getItem("accountNumber");
+
+    const userName =
+        localStorage.getItem("name");
+
+    if (!accountNumber) {
+        window.location.href = "/login.html";
+    }
+
+    document.getElementById("userName").textContent =
+        userName || "User";
+
+    document.getElementById("accountNumber").textContent =
+        accountNumber;
+
+    document.getElementById("account").textContent =
+        accountNumber;
+
+    async function loadAccount() {
+
+        try {
+
+            const response = await fetch(
+                "/api/account?accountNumber=" +
+                encodeURIComponent(accountNumber)
+            );
+
+            if (!response.ok) {
+                throw new Error("Unable to load account");
+            }
+
+            const account = await response.json();
+
+            document.getElementById("balance").textContent =
+                "₹" + Number(account.balance).toFixed(2);
+
+            document.getElementById("accountType").textContent =
+                account.accountType;
+
+            document.getElementById("status").textContent =
+                account.status;
+
+            document.getElementById("holder").textContent =
+                account.accountHolder;
+
+            document.getElementById("detailsType").textContent =
+                account.accountType;
+
+            document.getElementById("detailsStatus").textContent =
+                account.status;
+
+        } catch (error) {
+
+            console.error(error);
+
+            alert("Could not load account information.");
+
+        }
+    }
+
+
+    async function loadTransactions() {
+
+        const table =
+            document.getElementById("transactionTable");
+
+        try {
+
+            const response = await fetch(
+                "/api/transactions?accountNumber=" +
+                encodeURIComponent(accountNumber)
+            );
+
+            if (!response.ok) {
+                throw new Error("Unable to load transactions");
+            }
+
+            const transactions = await response.json();
+
+            table.innerHTML = "";
+
+            if (transactions.length === 0) {
+
+                table.innerHTML =
+                    '<tr><td colspan="4">No transactions yet.</td></tr>';
+
+                return;
+            }
+
+            transactions.forEach(transaction => {
+
+                const row = document.createElement("tr");
+
+                const date = new Date(transaction.date);
+
+                row.innerHTML = `
+                    <td>${date.toLocaleString()}</td>
+                    <td>${transaction.type}</td>
+                    <td>₹${Number(transaction.amount).toFixed(2)}</td>
+                    <td>₹${Number(transaction.balanceAfter).toFixed(2)}</td>
+                `;
+
+                table.appendChild(row);
+
+            });
+
+        } catch (error) {
+
+            console.error(error);
+
+            table.innerHTML =
+                '<tr><td colspan="4">Could not load transactions.</td></tr>';
+        }
+    }
+
+
+    async function deposit() {
+
+        const amount =
+            document.getElementById("depositAmount").value;
+
+        if (!amount || Number(amount) <= 0) {
+            alert("Please enter a valid deposit amount.");
+            return;
+        }
+
+        try {
+
+            const response = await fetch(
+                "/api/account/deposit?accountNumber=" +
+                encodeURIComponent(accountNumber) +
+                "&amount=" +
+                encodeURIComponent(amount),
+                {
+                    method: "POST"
+                }
+            );
+
+            const result = await response.json();
+
+            if (!response.ok) {
+                alert(result.message || "Deposit failed.");
+                return;
+            }
+
+            alert("Deposit successful!");
+
+            document.getElementById("depositAmount").value = "";
+
+            await loadAccount();
+            await loadTransactions();
+
+        } catch (error) {
+
+            console.error(error);
+
+            alert("Something went wrong.");
+
+        }
+    }
+
+
+    async function withdraw() {
+
+        const amount =
+            document.getElementById("withdrawAmount").value;
+
+        if (!amount || Number(amount) <= 0) {
+            alert("Please enter a valid withdrawal amount.");
+            return;
+        }
+
+        try {
+
+            const response = await fetch(
+                "/api/account/withdraw?accountNumber=" +
+                encodeURIComponent(accountNumber) +
+                "&amount=" +
+                encodeURIComponent(amount),
+                {
+                    method: "POST"
+                }
+            );
+
+            const result = await response.json();
+
+            if (!response.ok) {
+                alert(result.message || "Withdrawal failed.");
+                return;
+            }
+
+            alert("Withdrawal successful!");
+
+            document.getElementById("withdrawAmount").value = "";
+
+            await loadAccount();
+            await loadTransactions();
+
+        } catch (error) {
+
+            console.error(error);
+
+            alert("Something went wrong.");
+
+        }
+    }
+
+
+    function logout() {
+
+        localStorage.removeItem("accountNumber");
+        localStorage.removeItem("name");
+        localStorage.removeItem("email");
+
+        window.location.href = "/login.html";
+    }
+
+
+    loadAccount();
+    loadTransactions();
+
+</script>
+
+</body>
+</html>
