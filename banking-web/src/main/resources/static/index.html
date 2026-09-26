@@ -271,36 +271,29 @@ async function deposit() {
 
     try {
 
-        const response = await fetch("/api/account/deposit", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                accountNumber: accountNumber,
-                amount: amount
-            })
-        });
+        const response = await fetch(
+            `/api/account/deposit?accountNumber=${encodeURIComponent(accountNumber)}&amount=${amount}`,
+            {
+                method: "POST"
+            }
+        );
 
         const data = await response.json();
 
         if (!response.ok) {
-            alert(data.message || "Deposit failed.");
-            return;
+            throw new Error(data.message || "Deposit failed");
         }
-
-        document.getElementById("depositAmount").value = "";
-
-        await loadAccount();
-        await loadTransactions();
 
         alert("Deposit successful!");
 
+        document.getElementById("depositAmount").value = "";
+
+        loadAccount();
+        loadTransactions();
+
     } catch (error) {
-
         console.error(error);
-        alert("Something went wrong.");
-
+        alert("Deposit failed.");
     }
 }
 
@@ -317,16 +310,12 @@ async function withdraw() {
 
     try {
 
-        const response = await fetch("/api/account/withdraw", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                accountNumber: accountNumber,
-                amount: amount
-            })
-        });
+        const response = await fetch(
+            `/api/account/withdraw?accountNumber=${encodeURIComponent(accountNumber)}&amount=${amount}`,
+            {
+                method: "POST"
+            }
+        );
 
         const data = await response.json();
 
