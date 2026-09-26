@@ -6,158 +6,186 @@
     <title>Online Banking</title>
 
     <style>
+        * {
+            box-sizing: border-box;
+        }
+
         body {
+            margin: 0;
             font-family: Arial, sans-serif;
             background: #f4f6f8;
-            margin: 0;
-            padding: 20px;
+            color: #222;
+        }
+
+        .header {
+            background: #1f4e79;
+            color: white;
+            padding: 25px;
+            text-align: center;
+        }
+
+        .header h1 {
+            margin: 0 0 12px;
+        }
+
+        .header p {
+            margin: 6px;
         }
 
         .container {
-            max-width: 700px;
-            margin: auto;
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
         }
 
         .card {
             background: white;
+            border-radius: 12px;
             padding: 25px;
-            margin-bottom: 20px;
-            border-radius: 10px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
         }
 
-        h1, h2 {
+        .card h2 {
             margin-top: 0;
+            color: #1f4e79;
         }
 
         .balance {
             font-size: 32px;
             font-weight: bold;
-            margin: 15px 0;
+            margin: 25px 0;
+        }
+
+        .account-info p {
+            margin: 12px 0;
         }
 
         input {
             width: 100%;
             padding: 12px;
-            margin: 10px 0;
-            box-sizing: border-box;
+            margin: 15px 0;
             border: 1px solid #ccc;
-            border-radius: 5px;
+            border-radius: 6px;
+            font-size: 15px;
         }
 
         button {
-            padding: 12px 20px;
+            width: 100%;
+            padding: 12px;
             border: none;
-            border-radius: 5px;
+            border-radius: 6px;
+            background: #1f4e79;
+            color: white;
+            font-size: 15px;
             cursor: pointer;
-            margin-top: 5px;
         }
 
-        .deposit-btn {
-            background: #28a745;
-            color: white;
+        button:hover {
+            opacity: 0.9;
         }
 
-        .withdraw-btn {
-            background: #dc3545;
-            color: white;
+        .refresh {
+            background: #555;
         }
 
-        .refresh-btn {
-            background: #007bff;
-            color: white;
+        .transactions {
+            margin-top: 25px;
         }
 
-        .logout-btn {
-            background: #333;
-            color: white;
+        .transactions h2 {
+            color: #1f4e79;
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 15px;
+            background: white;
         }
 
-        th, td {
-            padding: 10px;
-            border: 1px solid #ddd;
+        th,
+        td {
+            padding: 14px;
+            border-bottom: 1px solid #ddd;
             text-align: left;
         }
 
         th {
-            background: #f0f0f0;
+            background: #1f4e79;
+            color: white;
         }
 
-        .message {
-            margin-top: 10px;
-            font-weight: bold;
+        .logout {
+            width: 180px;
+            margin-top: 25px;
+            background: #b22222;
+        }
+
+        @media (max-width: 900px) {
+            .dashboard {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 600px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+
+            .logout {
+                width: 100%;
+            }
         }
     </style>
 </head>
 
 <body>
 
+<div class="header">
+    <h1>Welcome, <span id="userName">User</span></h1>
+    <p>Account Number: <strong id="accountNumber"></strong></p>
+    <p>Account Type: <strong id="accountType"></strong></p>
+    <p>Status: <strong id="accountStatus"></strong></p>
+</div>
+
 <div class="container">
 
-    <div class="card">
-        <h1>Welcome, <span id="userName">User</span></h1>
+    <div class="dashboard">
 
-        <p>Account Number: <strong id="accountNumber"></strong></p>
-        <p>Account Type: <strong id="accountType"></strong></p>
-        <p>Status: <strong id="status"></strong></p>
+        <div class="card">
+            <h2>Balance</h2>
+            <div class="balance" id="balance">₹0.00</div>
+            <button class="refresh" onclick="loadAccount()">Refresh Balance</button>
+        </div>
+
+        <div class="card account-info">
+            <h2>Account Details</h2>
+            <p>Holder: <strong id="holder"></strong></p>
+            <p>Account: <strong id="accountDetailsNumber"></strong></p>
+            <p>Type: <strong id="type"></strong></p>
+            <p>Status: <strong id="status"></strong></p>
+        </div>
+
+        <div class="card">
+            <h2>Deposit</h2>
+            <input type="number" id="depositAmount" placeholder="Enter amount">
+            <button onclick="deposit()">Deposit</button>
+        </div>
+
+        <div class="card">
+            <h2>Withdraw</h2>
+            <input type="number" id="withdrawAmount" placeholder="Enter amount">
+            <button onclick="withdraw()">Withdraw</button>
+        </div>
+
     </div>
 
-    <div class="card">
-        <h2>Balance</h2>
-
-        <div class="balance" id="balance">₹0.00</div>
-
-        <button class="refresh-btn" onclick="loadAccount()">
-            Refresh Balance
-        </button>
-    </div>
-
-    <div class="card">
-        <h2>Deposit</h2>
-
-        <input
-            type="number"
-            id="depositAmount"
-            placeholder="Enter deposit amount"
-            min="1"
-        >
-
-        <button class="deposit-btn" onclick="deposit()">
-            Deposit
-        </button>
-    </div>
-
-    <div class="card">
-        <h2>Withdraw</h2>
-
-        <input
-            type="number"
-            id="withdrawAmount"
-            placeholder="Enter withdrawal amount"
-            min="1"
-        >
-
-        <button class="withdraw-btn" onclick="withdraw()">
-            Withdraw
-        </button>
-    </div>
-
-    <div class="card">
-        <h2>Account Details</h2>
-
-        <p>Holder: <strong id="holder"></strong></p>
-        <p>Account: <strong id="account"></strong></p>
-        <p>Type: <strong id="detailsType"></strong></p>
-        <p>Status: <strong id="detailsStatus"></strong></p>
-    </div>
-
-    <div class="card">
+    <div class="card transactions">
         <h2>Transaction History</h2>
 
         <table>
@@ -170,7 +198,7 @@
                 </tr>
             </thead>
 
-            <tbody id="transactionTable">
+            <tbody id="transactionBody">
                 <tr>
                     <td colspan="4">Loading transactions...</td>
                 </tr>
@@ -178,237 +206,211 @@
         </table>
     </div>
 
-    <div class="card">
-        <button class="logout-btn" onclick="logout()">
-            Logout
-        </button>
-    </div>
+    <button class="logout" onclick="logout()">Logout</button>
 
 </div>
 
 <script>
 
-    const accountNumber =
-        localStorage.getItem("accountNumber");
+const accountNumber = localStorage.getItem("accountNumber");
+const userName = localStorage.getItem("name") || "User";
 
-    const userName =
-        localStorage.getItem("name");
+if (!accountNumber) {
+    window.location.href = "/login.html";
+}
 
-    if (!accountNumber) {
-        window.location.href = "/login.html";
-    }
+document.getElementById("userName").textContent = userName;
+document.getElementById("accountNumber").textContent = accountNumber;
+document.getElementById("accountDetailsNumber").textContent = accountNumber;
+document.getElementById("holder").textContent = userName;
 
-    document.getElementById("userName").textContent =
-        userName || "User";
+async function loadAccount() {
 
-    document.getElementById("accountNumber").textContent =
-        accountNumber;
+    try {
 
-    document.getElementById("account").textContent =
-        accountNumber;
+        const response = await fetch(
+            `/api/account?accountNumber=${accountNumber}`
+        );
 
-    async function loadAccount() {
-
-        try {
-
-            const response = await fetch(
-                "/api/account?accountNumber=" +
-                encodeURIComponent(accountNumber)
-            );
-
-            if (!response.ok) {
-                throw new Error("Unable to load account");
-            }
-
-            const account = await response.json();
-
-            document.getElementById("balance").textContent =
-                "₹" + Number(account.balance).toFixed(2);
-
-            document.getElementById("accountType").textContent =
-                account.accountType;
-
-            document.getElementById("status").textContent =
-                account.status;
-
-            document.getElementById("holder").textContent =
-                account.accountHolder;
-
-            document.getElementById("detailsType").textContent =
-                account.accountType;
-
-            document.getElementById("detailsStatus").textContent =
-                account.status;
-
-        } catch (error) {
-
-            console.error(error);
-
-            alert("Could not load account information.");
-
+        if (!response.ok) {
+            throw new Error("Account not found");
         }
+
+        const account = await response.json();
+
+        document.getElementById("balance").textContent =
+            "₹" + Number(account.balance).toFixed(2);
+
+        document.getElementById("accountType").textContent =
+            account.accountType || "";
+
+        document.getElementById("accountStatus").textContent =
+            account.status || "";
+
+        document.getElementById("type").textContent =
+            account.accountType || "";
+
+        document.getElementById("status").textContent =
+            account.status || "";
+
+    } catch (error) {
+        console.error(error);
+    }
+}
+
+async function deposit() {
+
+    const amount = Number(
+        document.getElementById("depositAmount").value
+    );
+
+    if (!amount || amount <= 0) {
+        alert("Please enter a valid deposit amount.");
+        return;
     }
 
+    try {
 
-    async function loadTransactions() {
+        const response = await fetch("/api/account/deposit", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                accountNumber: accountNumber,
+                amount: amount
+            })
+        });
 
-        const table =
-            document.getElementById("transactionTable");
+        const data = await response.json();
 
-        try {
-
-            const response = await fetch(
-                "/api/transactions?accountNumber=" +
-                encodeURIComponent(accountNumber)
-            );
-
-            if (!response.ok) {
-                throw new Error("Unable to load transactions");
-            }
-
-            const transactions = await response.json();
-
-            table.innerHTML = "";
-
-            if (transactions.length === 0) {
-
-                table.innerHTML =
-                    '<tr><td colspan="4">No transactions yet.</td></tr>';
-
-                return;
-            }
-
-            transactions.forEach(transaction => {
-
-                const row = document.createElement("tr");
-
-                const date = new Date(transaction.date);
-
-                row.innerHTML = `
-                    <td>${date.toLocaleString()}</td>
-                    <td>${transaction.type}</td>
-                    <td>₹${Number(transaction.amount).toFixed(2)}</td>
-                    <td>₹${Number(transaction.balanceAfter).toFixed(2)}</td>
-                `;
-
-                table.appendChild(row);
-
-            });
-
-        } catch (error) {
-
-            console.error(error);
-
-            table.innerHTML =
-                '<tr><td colspan="4">Could not load transactions.</td></tr>';
-        }
-    }
-
-
-    async function deposit() {
-
-        const amount =
-            document.getElementById("depositAmount").value;
-
-        if (!amount || Number(amount) <= 0) {
-            alert("Please enter a valid deposit amount.");
+        if (!response.ok) {
+            alert(data.message || "Deposit failed.");
             return;
         }
 
-        try {
+        document.getElementById("depositAmount").value = "";
 
-            const response = await fetch(
-                "/api/account/deposit?accountNumber=" +
-                encodeURIComponent(accountNumber) +
-                "&amount=" +
-                encodeURIComponent(amount),
-                {
-                    method: "POST"
-                }
-            );
+        await loadAccount();
+        await loadTransactions();
 
-            const result = await response.json();
+        alert("Deposit successful!");
 
-            if (!response.ok) {
-                alert(result.message || "Deposit failed.");
-                return;
-            }
+    } catch (error) {
 
-            alert("Deposit successful!");
+        console.error(error);
+        alert("Something went wrong.");
 
-            document.getElementById("depositAmount").value = "";
+    }
+}
 
-            await loadAccount();
-            await loadTransactions();
+async function withdraw() {
 
-        } catch (error) {
+    const amount = Number(
+        document.getElementById("withdrawAmount").value
+    );
 
-            console.error(error);
-
-            alert("Something went wrong.");
-
-        }
+    if (!amount || amount <= 0) {
+        alert("Please enter a valid withdrawal amount.");
+        return;
     }
 
+    try {
 
-    async function withdraw() {
+        const response = await fetch("/api/account/withdraw", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                accountNumber: accountNumber,
+                amount: amount
+            })
+        });
 
-        const amount =
-            document.getElementById("withdrawAmount").value;
+        const data = await response.json();
 
-        if (!amount || Number(amount) <= 0) {
-            alert("Please enter a valid withdrawal amount.");
+        if (!response.ok) {
+            alert(data.message || "Withdrawal failed.");
             return;
         }
 
-        try {
+        document.getElementById("withdrawAmount").value = "";
 
-            const response = await fetch(
-                "/api/account/withdraw?accountNumber=" +
-                encodeURIComponent(accountNumber) +
-                "&amount=" +
-                encodeURIComponent(amount),
-                {
-                    method: "POST"
-                }
-            );
+        await loadAccount();
+        await loadTransactions();
 
-            const result = await response.json();
+        alert("Withdrawal successful!");
 
-            if (!response.ok) {
-                alert(result.message || "Withdrawal failed.");
-                return;
-            }
+    } catch (error) {
 
-            alert("Withdrawal successful!");
+        console.error(error);
+        alert("Something went wrong.");
 
-            document.getElementById("withdrawAmount").value = "";
+    }
+}
 
-            await loadAccount();
-            await loadTransactions();
+async function loadTransactions() {
 
-        } catch (error) {
+    try {
 
-            console.error(error);
+        const response = await fetch(
+            `/api/transactions?accountNumber=${accountNumber}`
+        );
 
-            alert("Something went wrong.");
-
+        if (!response.ok) {
+            throw new Error("Could not load transactions");
         }
+
+        const transactions = await response.json();
+
+        const body = document.getElementById("transactionBody");
+
+        if (!transactions || transactions.length === 0) {
+
+            body.innerHTML =
+                '<tr><td colspan="4">No transactions yet.</td></tr>';
+
+            return;
+        }
+
+        body.innerHTML = "";
+
+        transactions.forEach(transaction => {
+
+            const row = document.createElement("tr");
+
+            row.innerHTML = `
+                <td>${transaction.date || ""}</td>
+                <td>${transaction.type || ""}</td>
+                <td>₹${Number(transaction.amount || 0).toFixed(2)}</td>
+                <td>₹${Number(transaction.balanceAfter || 0).toFixed(2)}</td>
+            `;
+
+            body.appendChild(row);
+
+        });
+
+    } catch (error) {
+
+        console.error(error);
+
+        document.getElementById("transactionBody").innerHTML =
+            '<tr><td colspan="4">Unable to load transactions.</td></tr>';
     }
+}
 
+function logout() {
 
-    function logout() {
+    localStorage.removeItem("accountNumber");
+    localStorage.removeItem("name");
+    localStorage.removeItem("email");
 
-        localStorage.removeItem("accountNumber");
-        localStorage.removeItem("name");
-        localStorage.removeItem("email");
+    window.location.href = "/login.html";
+}
 
-        window.location.href = "/login.html";
-    }
-
-
-    loadAccount();
-    loadTransactions();
+loadAccount();
+loadTransactions();
 
 </script>
 
